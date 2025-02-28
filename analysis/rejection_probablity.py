@@ -1,8 +1,6 @@
 import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cm
 
 
 def compute_rho(lambda_i, N, m, mu_i):
@@ -53,48 +51,29 @@ def compute_cpu_usage(lambda_i, N, m, mu_i, K):
 def compute_rejection_probablity(lambda_i, N, m, mu_i, K):
     return compute_pi_n(lambda_i, N, m, mu_i, K, K)
 
+# keep N as 1 as we care about only vms
+N, m, K = 1, 15, 100
 
-# Parameters
-K = 100  # Queue capacity
-mu_i = 90  # Service rate
+service_rate = (45, 90, 150)
 
-# Ranges for the variables
-lambda_values = np.linspace(1, 2000, 200)  # Adjusted range for lambda
-m_value = np.linspace(1, 40, 10)  # Adjusted range for VMs
+lambda_values = np.linspace(0, 2*10**4, 50).astype(int)
+rejection_probablity = [[], [], []]
 
-# Create the grid
-X, Y = np.meshgrid(lambda_values, m_value)
-print(X.shape, Y.shape)
-
-# Calculate CPU usage for each combination
-Z = np.zeros_like(X)
-for i in range(X.shape[0]):
-    for j in range(Y.shape[1]):
-        lambda_i = int(X[i, j])
-        m = int(Y[i, j])
-        cpu_usage = (compute_cpu_usage(lambda_i, 1, m, mu_i, K) * 100)
-        Z[i, j] = cpu_usage
+# Calculate CPU usage for each lambda
+for lambda_i in lambda_values:
+    for i, mu_i in enumerate(service_rate):
+        rejection = compute_rejection_probablity(lambda_i, N, m, mu_i, K)
+        rejection_probablity[i].append(rejection)
 
 
-# Create the 3D plot
-fig = plt.figure(figsize=(10, 8))
-ax = fig.add_subplot(111, projection='3d')
-
-# Use the 'jet' color map and increase resolution
-surf = ax.plot_surface(X, Y, Z, cmap='jet', rstride=1,
-                       cstride=1, edgecolor='none')
-
-# Set labels and title
-ax.set_xlabel('Tasks/s')
-ax.set_ylabel('Number of VMs')
-ax.set_zlabel('CPU usage (%)')
-ax.set_title('CPU Usage vs. Number of VMs and Tasks/s')
-
-# Adjust view angle to match the first image
-ax.view_init(elev=10, azim=-110)
-
-# Add color bar
-fig.colorbar(surf, shrink=0.5, aspect=5)
-
+# Plot the graph
+plt.plot(lambda_values, rejection_probablity[0], label="Small")
+plt.plot(lambda_values, rejection_probablity[1], label="Medium")
+plt.plot(lambda_values, rejection_probablity[2], label="Large")
+plt.xlabel("Arrival Rate (lambda)")
+plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+plt.ylabel("Rejection Probablity")
+plt.title("Rejection Probablity vs Arrival Rate (lambda)")
+plt.grid(True)
+plt.legend()
 plt.show()
-

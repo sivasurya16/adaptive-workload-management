@@ -59,7 +59,7 @@ K = 100  # Queue capacity
 mu_i = 90  # Service rate
 
 # Ranges for the variables
-lambda_values = np.linspace(1, 2000, 200)  # Adjusted range for lambda
+lambda_values = np.linspace(1, 2000, 50)  # Adjusted range for lambda
 m_value = np.linspace(1, 40, 10)  # Adjusted range for VMs
 
 # Create the grid

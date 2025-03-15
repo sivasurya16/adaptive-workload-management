@@ -1,12 +1,39 @@
 package com.miniproject.cloudsim;
 
-package org.cloudbus.cloudsim;
+//package org.cloudbus.cloudsim;
 
+//import org.cloudbus.cloudsim.core.CloudSim;
+//import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
+//import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
+//import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
+import org.cloudbus.cloudsim.Cloudlet;
+import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
+import org.cloudbus.cloudsim.Datacenter;
+import org.cloudbus.cloudsim.DatacenterBroker;
+import org.cloudbus.cloudsim.DatacenterCharacteristics;
+import org.cloudbus.cloudsim.Host;
+import org.cloudbus.cloudsim.Pe;
+import org.cloudbus.cloudsim.UtilizationModel;
+import org.cloudbus.cloudsim.UtilizationModelFull;
+import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.VmAllocationPolicySimple;
+import org.cloudbus.cloudsim.VmAllocationWithSelectionPolicy;
+import org.cloudbus.cloudsim.VmSchedulerSpaceShared;
+import org.cloudbus.cloudsim.VmSchedulerTimeShared;
+import org.cloudbus.cloudsim.VmSchedulerTimeSharedOverSubscription;
+import org.cloudbus.cloudsim.EX.VmSchedulerWithIndependentPes;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.lists.HostList;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
-import java.util.*;
+import org.cloudbus.cloudsim.selectionPolicies.SelectionPolicy;
+import org.cloudbus.cloudsim.selectionPolicies.SelectionPolicyFirstFit;
+import org.cloudbus.cloudsim.selectionPolicies.SelectionPolicyRandomSelection;
 
 public class Main {
     // Simulation constants
@@ -16,19 +43,24 @@ public class Main {
     private static final int HOST_PE_MIPS = 20000; // MIPS per PE
     private static final int HOST_RAM = 65536; // 64 GB (in MB)
     private static final long HOST_STORAGE = 5 * 1024 * 1024; // 5 TB (in MB)
+    private static DatacenterBroker broker;
+    private static int hid = 0;
 
     // VM types (from Table 5)
     private static final int SMALL_VM_PES = 1;
     private static final int SMALL_VM_MIPS = 7000;
     private static final int SMALL_VM_RAM = 1024; // 1 GB
+    private static final int SMALL_VM_BANDWIDTH = 500; 
     
     private static final int MEDIUM_VM_PES = 1;
     private static final int MEDIUM_VM_MIPS = 20000;
     private static final int MEDIUM_VM_RAM = 4096; // 4 GB
+    private static final int MEDIUM_VM_BANDWIDTH = 1000;
     
     private static final int LARGE_VM_PES = 2;
     private static final int LARGE_VM_MIPS = 40000;
     private static final int LARGE_VM_RAM = 8192; // 8 GB
+    private static final int LARGE_VM_BANDWIDTH = 2000;
 
     // Cloudlet properties (from Table 6)
     private static final int CLOUDLET_LENGTH = 10000;
@@ -46,27 +78,37 @@ public class Main {
                 datacenters.add(createDatacenter("Datacenter_" + dcId));
             }
 
-            DatacenterBroker broker = new DatacenterBroker("Broker");
+            broker = new DatacenterBroker("Broker");
 
             // Create mixed VM types (adjust ratios as needed)
             List<Vm> vmList = new ArrayList<>();
-            int vmsPerType = 50; // Example: 50 small, 50 medium, 50 large
-            for (int i = 0; i < vmsPerType; i++) {
-                vmList.add(createVm(i, SMALL_VM_PES, SMALL_VM_MIPS, SMALL_VM_RAM));
-                vmList.add(createVm(i + vmsPerType, MEDIUM_VM_PES, MEDIUM_VM_MIPS, MEDIUM_VM_RAM));
-                vmList.add(createVm(i + 2*vmsPerType, LARGE_VM_PES, LARGE_VM_MIPS, LARGE_VM_RAM));
+//            int vmsPerType = 100; // Example: 50 small, 50 medium, 50 large
+//            int totalVms = 88;
+//            for (int i = 0; i < totalVms; i+=1) {
+//                vmList.add(createVm(i, SMALL_VM_PES, SMALL_VM_MIPS, SMALL_VM_RAM));
+//                vmList.add(createVm(i + 1, MEDIUM_VM_PES, MEDIUM_VM_MIPS, MEDIUM_VM_RAM));
+//                vmList.add(createVm(i + 2, LARGE_VM_PES, LARGE_VM_MIPS/LARGE_VM_PES, LARGE_VM_RAM));
+//            }
+            for (int i=0;i<96;i++) {
+            	vmList.add(createVm(i, SMALL_VM_PES, SMALL_VM_MIPS, SMALL_VM_RAM,SMALL_VM_BANDWIDTH));
+            }
+            for (int i=0;i<96;i++) {
+            	vmList.add(createVm(96 + i + 1, MEDIUM_VM_PES, MEDIUM_VM_MIPS, MEDIUM_VM_RAM,MEDIUM_VM_BANDWIDTH));
+            }
+            for (int i=0;i<88;i++) {
+            	vmList.add(createVm(96*2 + i + 2, LARGE_VM_PES, LARGE_VM_MIPS/LARGE_VM_PES, LARGE_VM_RAM,LARGE_VM_BANDWIDTH));
             }
             broker.submitGuestList(vmList);
 
             // Submit cloudlets
-            List<Cloudlet> cloudletList = createCloudlets(1000);
-            broker.submitCloudletList(cloudletList);
+//            List<Cloudlet> cloudletList = createCloudlets(1000);
+//            broker.submitCloudletList(cloudletList);
 
             CloudSim.startSimulation();
 
             // Calculate performance metrics
-            List<Cloudlet> finishedCloudlets = broker.getCloudletReceivedList();
-            printMetrics(finishedCloudlets);
+//            List<Cloudlet> finishedCloudlets = broker.getCloudletReceivedList();
+//            printMetrics(finishedCloudlets);
 
             CloudSim.stopSimulation();
         } catch (Exception e) {
@@ -82,29 +124,30 @@ public class Main {
                 peList.add(new Pe(peId, new PeProvisionerSimple(HOST_PE_MIPS)));
             }
             Host host = new Host(
-                hostId,
+                hid++,
                 new RamProvisionerSimple(HOST_RAM),
-                new BwProvisionerSimple(10000),
+                new BwProvisionerSimple(16000),
                 HOST_STORAGE,
                 peList,
-                new VmSchedulerSpaceShared(peList) // Use SpaceShared scheduler
+                new VmSchedulerTimeShared(peList)
             );
             hostList.add(host);
         }
         DatacenterCharacteristics characteristics = new DatacenterCharacteristics(
             "x86", "Linux", "Xen", hostList, 10.0, 0.1, 0.1, 0.1, 0.1
         );
+
         try {
-            return new Datacenter(name, characteristics, new VmAllocationPolicySimple(hostList), new ArrayList<>(), 0);
+            return new Datacenter(name, characteristics, new VmAllocationWithSelectionPolicy(hostList, new SelectionPolicyFirstFit()), new ArrayList<>(), 0);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    private static Vm createVm(int id, int pes, int mips, int ram) {
+    private static Vm createVm(int id, int pes, int mips, int ram, int bw) {
         return new Vm(
-            id, 0, mips, pes, ram, 1000, 0, "Xen",
+            id, broker.getId(), mips, pes, ram, bw, 0, "Xen",
             new CloudletSchedulerTimeShared()
         );
     }

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEE Result Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>JEE Result Portal 2025</h1>
+        <div class="card">
+            <div class="search-section">
+                <h2>Check Your Result</h2>
+                <p>Enter your JEE Registration Number below to view your result</p>
+                <div class="input-group">
+                    <input type="text" id="registration-number" placeholder="Enter JEE Registration Number (e.g., JEE2025001)">
+                    <button id="search-btn">View Result</button>
+                </div>
+                <div id="error-message" class="error-message"></div>
+            </div>
+            
+            <div id="result-section" class="result-section hidden">
+                <h2>Result Details</h2>
+                <div class="student-info">
+                    <p><strong>Registration Number:</strong> <span id="reg-number"></span></p>
+                    <p><strong>Student Name:</strong> <span id="student-name"></span></p>
+                </div>
+                
+                <table class="result-table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Marks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Physics</td>
+                            <td id="physics-marks"></td>
+                        </tr>
+                        <tr>
+                            <td>Chemistry</td>
+                            <td id="chemistry-marks"></td>
+                        </tr>
+                        <tr>
+                            <td>Mathematics</td>
+                            <td id="mathematics-marks"></td>
+                        </tr>
+                        <tr class="total-row">
+                            <td><strong>Total</strong></td>
+                            <td id="total-marks"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="result-summary">
+                    <p><strong>Percentile:</strong> <span id="percentile"></span></p>
+                </div>
+                
+                <button id="search-again-btn">Check Another Result</button>
+            </div>
+            
+            <div id="no-result-section" class="no-result-section hidden">
+                <h2>No Result Found</h2>
+                <p>We couldn't find any result for the registration number you provided.</p>
+                <p>Please check the registration number and try again.</p>
+                <button id="try-again-btn">Try Again</button>
+            </div>
+        </div>
+        
+        <div class="help-section">
+            <h3>Sample Registration Numbers for Testing</h3>
+            <ul>
+                <li>JEE2025001 - Rahul Sharma</li>
+                <li>JEE2025002 - Priya Patel</li>
+                <li>JEE2025003 - Amit Kumar</li>
+                <li>JEE2025004 - Sneha Gupta</li>
+                <li>JEE2025005 - Raj Singh</li>
+            </ul>
+        </div>
+        
+        <footer>
+            <p>&copy; 2025 JEE Result Portal. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
